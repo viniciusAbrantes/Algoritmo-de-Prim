@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <limits.h>
-#include<stdbool.h>
-
 #define V 7 //Number of vertices in the graph
 
-int minKey(int key[]);
-int printMST(int parent[], int n, int graph[V][V]);
-void primMST(int graph[V][V]);
+int minKey(int keys[]);
+void primMst(int graph[V][V]);
+int printMst(int parents[], int n, int graph[V][V]);
+void printKeys(int keys[], int exeCount);
 
 int main() {
 	//Adjacency matrix
@@ -19,65 +18,68 @@ int main() {
 	                   {0, 0, 4, 5, 9, 0, 0}};
 
 	//Execute the algorithm and print the solution
-	primMST(graph);
+	primMst(graph);
 
 	return 0;
 }
 
-void primMST(int graph[V][V]) {
-	//Store constructed MST
-	int parent[V];
-	//Key values used to select the best vertex
-	int key[V];
+void primMst(int graph[V][V]) {
+	int parents[V];
+	int keys[V];
 
-	//Initialize all keys as INT_MAX
-	for(int i = 0; i < V; i++) {
-		key[i] = INT_MAX;
-	}
+	//Initialize key values
+	for(int i = 0; i < V; i++) 
+		keys[i] = 0;
+	keys[V-1] = 1;
+	parents[V-1] = -1; //First node is the root of MST
 
-	//Insert the 1st vertex in MST. Make key 0 so that this vertex is picked as first vertex.
-	key[0] = 0;
-	parent[0] = -1; //First node is the root of MST
+	printKeys(keys, 0); //initial state	
 
-	//The MST will have V vertices
 	for(int count = 0; count < V-1; count++) {
-		//Pick the minimum key vertex from the set of vertices not yet included in MST
-		int u = minKey(key);
-
-		//Update key value and parent index of the adjacent vertices of the picked vertex.
-		//Consider only those vertices which are not yet included in MST
+		int u = minKey(keys); //Select the best vertex
 		for(int v = 0; v < V; v++) {
-			//graph[u][v] is non zero only for adjacent vertices
-			//key[v] != -1 is false forvertices not yet included in MST
-			if(graph[u][v] && key[v] != -1) {
-				parent[v] = u;
-				key[v] = graph[u][v];
+			if(graph[u][v] && keys[v] != -1 && (keys[v] == 0 || graph[u][v] < keys[v])) {
+				parents[v] = u;
+				keys[v] = graph[u][v];	
 			}
 		}
-
-		printf("Execution %i\n", count + 1);
-		for(int i = 0; i < V; i++) 
-			printf(" Vertex %c: %i\n", i + 65, key[i]);
-		printf("\n");
+		printKeys(keys, count + 1);
 	}
-
-	printMST(parent, V, graph);
+	printMst(parents, V, graph);
 }
 
-int minKey(int key[]) {
+int minKey(int keys[]) {
 	int min = INT_MAX, minIndex;
 	for(int v = 0; v < V; v++) {
-		if(key[v] != -1 && key[v] < min) {
-			min = key[v];
+		if(keys[v] > 0 && keys[v] < min) {
+			min = keys[v];
 			minIndex = v;
 		}
 	}
-	key[minIndex] = -1;
+	keys[minIndex] = -1;
 	return minIndex;
 }
 
-int printMST(int parent[], int n, int graph[V][V]) {
+int printMst(int parents[], int n, int graph[V][V]) {
 	printf("Edge \tWeight\n");
-	for(int i = 1; i < V; i++)
-		printf("%c - %c \t%d \n", parent[i]+65, i+65, graph[i][parent[i]]);
+	for(int i = 0; i < V; i++)
+		printf("%c - %c \t%d \n", parents[i]+65, i+65, graph[i][parents[i]]);
+}
+
+void printKeys(int keys[], int exeCount) {
+	printf("Execution %i\n", exeCount);
+	printf(" Vertex\tWeight\n");
+	for(int i = 0; i < V; i++) {
+		switch(keys[i]) {
+			case 0:
+				printf(" %c\t-\n", i + 65);
+				break;
+			case -1:
+				printf(" %c\tin\n", i + 65);
+				break;
+			default:
+				printf(" %c\t%i\n", i + 65, keys[i]);
+		}
+	}
+	printf("\n");
 }
