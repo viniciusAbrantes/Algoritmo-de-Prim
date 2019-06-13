@@ -2,10 +2,10 @@
 #include <limits.h>
 #define V 7 //Number of vertices in the graph
 
-int minKey(int keys[]);
 void primMst(int graph[V][V]);
-int printMst(int parents[], int n, int graph[V][V]);
+int minKey(int keys[]);
 void printKeys(int keys[], int exeCount);
+int printMst(int parents[], int n, int graph[V][V]);
 
 int main() {
 	//Adjacency matrix
@@ -30,8 +30,10 @@ void primMst(int graph[V][V]) {
 	//Initialize key values
 	for(int i = 0; i < V; i++) 
 		keys[i] = 0;
+
+	//Select the root node
 	keys[V-1] = 1;
-	parents[V-1] = -1; //First node is the root of MST
+	parents[V-1] = -1;
 
 	printKeys(keys, 0); //initial state	
 
